@@ -5,8 +5,7 @@ import dagger.Component
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.TimedRobot
 import mu.KotlinLogging
-import org.example.swerve.controls.Controls
-import org.example.swerve.controls.Trigger
+import org.strykeforce.controls.Controls
 import org.strykeforce.thirdcoast.swerve.GyroModule
 import org.strykeforce.thirdcoast.swerve.SwerveDrive
 import org.strykeforce.thirdcoast.swerve.WheelModule
@@ -23,14 +22,11 @@ class Skippy : TimedRobot() {
     private val logger = KotlinLogging.logger {}
 
     private val components = robotComponents()
-    private lateinit var controls: Controls
-    private lateinit var gyroResetButton: Trigger
-    private lateinit var swerveDrive: SwerveDrive
+    private val controls = components.controls()
+    private val swerveDrive = components.swerveDrive()
+    private val gyroResetButton = controls.resetButton
 
     override fun robotInit() {
-        controls = components.controls()
-        gyroResetButton = controls.resetButton
-        swerveDrive = components.swerveDrive()
         swerveDrive.zeroAzimuthEncoders()
     }
 
@@ -39,11 +35,12 @@ class Skippy : TimedRobot() {
     }
 
     override fun teleopPeriodic() {
-        if (gyroResetButton.hasActivated()) {
-            val msg = "Resetting gyro yaw zero"
-            logger.warn(msg)
-            DriverStation.reportWarning(msg, false)
-            swerveDrive.getGyro().zeroYaw()
+        if (gyroResetButton.isActivated) {
+            swerveDrive.gyro.zeroYaw()
+            "reset gyro zero".let {
+                logger.warn(it)
+                DriverStation.reportWarning(it, false)
+            }
         }
         val forward = controls.forward.applyDeadband(DEADBAND)
         val strafe = controls.strafe.applyDeadband(DEADBAND)
