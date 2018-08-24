@@ -1,0 +1,83 @@
+import jaci.openrio.gradle.GradleRIOPlugin
+import jaci.openrio.gradle.frc.FRCJavaArtifact
+import jaci.openrio.gradle.frc.RoboRIO
+
+buildscript {
+    ext {
+        kotlin_version = "1.2.61"
+        dagger_version = "2.17"
+    }
+
+    repositories {
+        jcenter()
+        maven {
+            url = "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "gradle.plugin.jaci.openrio.gradle:GradleRIO:2018.03.06"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'idea'
+apply plugin: "jaci.openrio.gradle.GradleRIO"
+
+def TEAM = 2767
+def ROBOT_CLASS = "org.strykeforce.Skippy"
+
+deploy {
+    targets {
+        target("roborio", RoboRIO) {
+            team = TEAM
+        }
+    }
+    artifacts {
+        artifact('frcJava', FRCJavaArtifact) {
+            targets << "roborio"
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' } // nanohttpd
+    mavenLocal()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    compile wpilib()
+    compile ctre()
+    compile navx()
+    compile 'org.strykeforce.thirdcoast:core:18.6.0'
+
+    compile 'io.github.microutils:kotlin-logging:1.5.9'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+
+    compile "com.google.dagger:dagger:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+}
+
+def robotManifest = {
+    attributes 'Main-Class': 'edu.wpi.first.wpilibj.RobotBase'
+    attributes 'Robot-Class': frc.robotClass
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest GradleRIOPlugin.javaManifest(ROBOT_CLASS)
+}
+
+idea {
+    module {
+        sourceDirs += file('build/generated/source/kapt/main')
+        generatedSourceDirs += file('build/generated/source/kapt/main')
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
