@@ -55,10 +55,8 @@ class Jif : TimedRobot() {
     }
 
     private fun robotComponents(): RobotComponents {
-        var config: URL = this.javaClass.getResource(DEFAULT_CONFIG)
-
         val f = File(CONFIG)
-        if (f.exists() && !f.isDirectory) config = f.toURI().toURL()
+        val config = if (f.exists()) f.toURI().toURL() else this.javaClass.getResource(DEFAULT_CONFIG)
 
         logger.info("reading settings from '{}'", config)
         return DaggerRobotComponents.builder().config(config).build()

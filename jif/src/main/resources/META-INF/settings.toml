@@ -1,7 +1,7 @@
 [THIRDCOAST.SWERVE]
-  length        = 20.625 # wheelbase length
-  width         = 26.125 # wheelbase width
-  enableGyroLogging = false # turn this off if too noisy
+  length        = 20.5   # wheelbase length
+  width         = 26.625 # wheelbase width
+  enableGyroLogging = true # turn this off if too noisy
 
 [[TALON]]
   name = "azimuth"
@@ -13,13 +13,13 @@
     peak = 0
     peakDuration = 0
   [TALON.motionMagic]
-    acceleration = 0
-    cruiseVelocity = 0
+    acceleration = 10_000
+    cruiseVelocity = 800
   [[TALON.closedLoopProfile]] # slot 0 MotionMagic, normal
-    pGain = 0.0 # replace these with values for your azimuth
+    pGain = 10.0
     iGain = 0.0
-    dGain = 0.0
-    fGain = 0.0
+    dGain = 100.0
+    fGain = 1.0
     iZone = 0
     allowableClosedLoopError = 0
 
@@ -34,3 +34,6 @@
    continuous = 40
    peak = 0
    peakDuration = 0
+ [TALON.velocityMeasurement]
+   period = "Period_50Ms"
+   window = 32
