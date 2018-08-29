@@ -13,9 +13,7 @@ constructor() {
 
     val resetButton: Trigger
         get() = object : Trigger() {
-            override fun get(): Boolean {
-                return driverController.getRawButton(Switch.RESET.index)
-            }
+            override fun get() = driverController.getRawButton(Switch.RESET.index)
         }
 
     /**
@@ -44,18 +42,18 @@ constructor() {
 
 }
 
-enum class Shoulder private constructor(val index: Int) {
+enum class Shoulder constructor(val index: Int) {
     RIGHT(2),
     LEFT_DOWN(4),
     LEFT_UP(5)
 }
 
-enum class Switch private constructor(val index: Int) {
+enum class Switch constructor(val index: Int) {
     LEFT(1),
     RESET(3)
 }
 
-enum class Trim private constructor(val index: Int) {
+enum class Trim constructor(val index: Int) {
     LEFT_X_POS(7),
     LEFT_X_NEG(6),
     LEFT_Y_POS(8),
@@ -66,7 +64,7 @@ enum class Trim private constructor(val index: Int) {
     RIGHT_X_NEG(13)
 }
 
-enum class Axis private constructor(val index: Int) {
+enum class Axis constructor(val index: Int) {
     RIGHT_X(0),
     RIGHT_Y(1),
     LEFT_X(5),
