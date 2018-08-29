@@ -3,6 +3,9 @@
   width         = 26.625 # wheelbase width
   enableGyroLogging = true # turn this off if too noisy
 
+[THIRDCOAST.TALONS]
+  summarizeErrors = true
+
 [[TALON]]
   name = "azimuth"
   talonIds = [0, 1, 2, 3]

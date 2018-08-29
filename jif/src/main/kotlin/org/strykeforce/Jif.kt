@@ -1,37 +1,24 @@
 package org.strykeforce
 
-import dagger.BindsInstance
-import dagger.Component
-import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.TimedRobot
-import mu.KotlinLogging
-import org.strykeforce.controls.Controls
-import org.strykeforce.thirdcoast.swerve.GyroModule
+import edu.wpi.first.wpilibj.command.Scheduler
 import org.strykeforce.thirdcoast.swerve.SwerveDrive
-import org.strykeforce.thirdcoast.swerve.WheelModule
 import java.io.File
-import java.net.URL
-import javax.inject.Singleton
 
-const val CONFIG = "/home/lvuser/jif.toml"
-const val DEFAULT_CONFIG = "/META-INF/settings.toml"
-const val SAVE_AZIMUTHS = "/home/lvuser/zero.me"
-
-const val DEADBAND = 0.05
+const val ZERO_ME = "/home/lvuser/zero.me"
 
 class Jif : TimedRobot() {
 
-    private val logger = KotlinLogging.logger {}
-
-    private val components = robotComponents()
-    private val controls = components.controls()
-    private val swerveDrive = components.swerveDrive()
-    private val gyroResetButton = controls.resetButton
+    val swerveDrive = robotComponents.swerveDrive()
+    val telemetryService = robotComponents.telemetryService()
 
     override fun robotInit() {
-        // save azimuth zero positions by creating file named in SAVE_AZIMUTHS
-        if (File(SAVE_AZIMUTHS).delete()) swerveDrive.saveAzimuthPositions()
+        // save azimuth zero positions by creating file named in ZERO_ME
+        if (File(ZERO_ME).delete()) swerveDrive.saveAzimuthPositions()
         swerveDrive.zeroAzimuthEncoders()
+
+        telemetryService.register(swerveDrive)
+        telemetryService.start()
     }
 
     override fun teleopInit() {
@@ -39,43 +26,6 @@ class Jif : TimedRobot() {
     }
 
     override fun teleopPeriodic() {
-        val forward = controls.forward.applyDeadband(DEADBAND)
-        val strafe = controls.strafe.applyDeadband(DEADBAND)
-        val azimuth = controls.azimuth.applyDeadband(DEADBAND)
-
-        swerveDrive.drive(forward, strafe, azimuth)
-
-        if (gyroResetButton.isActivated) {
-            swerveDrive.gyro.zeroYaw()
-            "reset gyro zero".let {
-                logger.warn(it)
-                DriverStation.reportWarning(it, false)
-            }
-        }
-    }
-
-    private fun robotComponents(): RobotComponents {
-        val f = File(CONFIG)
-        val config = if (f.exists()) f.toURI().toURL() else this.javaClass.getResource(DEFAULT_CONFIG)
-
-        logger.info("reading settings from '{}'", config)
-        return DaggerRobotComponents.builder().config(config).build()
-    }
-}
-
-private fun Double.applyDeadband(amount: Double) = if (Math.abs(this) < amount) 0.0 else this
-
-@Singleton
-@Component(modules = [GyroModule::class, WheelModule::class])
-interface RobotComponents {
-    fun controls(): Controls
-    fun swerveDrive(): SwerveDrive
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun config(config: URL): Builder
-
-        fun build(): RobotComponents
+        Scheduler.getInstance().run()
     }
 }

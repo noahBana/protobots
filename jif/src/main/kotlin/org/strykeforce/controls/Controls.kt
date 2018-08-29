@@ -1,45 +1,29 @@
 package org.strykeforce.controls
 
 import edu.wpi.first.wpilibj.Joystick
+import edu.wpi.first.wpilibj.buttons.JoystickButton
+import org.strykeforce.command.ZeroGyroCommand
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Accesses driver config input.  */
 @Singleton
-class Controls @Inject
-constructor() {
+class Controls @Inject constructor() {
 
     private val driverController = Joystick(1)
 
-    val resetButton: Trigger
-        get() = object : Trigger() {
-            override fun get() = driverController.getRawButton(Switch.RESET.index)
-        }
+    init {
+        JoystickButton(driverController, Switch.RESET.index).whenPressed(ZeroGyroCommand())
+    }
 
-    /**
-     * Return the driver controller left stick Y-axis position.
-     *
-     * @return the position, range is -1.0 (full reverse) to 1.0 (full forward)
-     */
     val forward: Double
         get() = -driverController.getRawAxis(Axis.LEFT_Y.index)
 
-    /**
-     * Return the driver controller left stick X-axis position.
-     *
-     * @return the position, range is -1.0 (full left) to 1.0 (full right)
-     */
     val strafe: Double
         get() = driverController.getRawAxis(Axis.LEFT_X.index)
 
-    /**
-     * Return the driver controller right stick X-axis position.
-     *
-     * @return the position, range is -1.0 (full left) to 1.0 (full right)
-     */
     val azimuth: Double
         get() = driverController.getRawAxis(Axis.RIGHT_X.index)
-
 }
 
 enum class Shoulder constructor(val index: Int) {
