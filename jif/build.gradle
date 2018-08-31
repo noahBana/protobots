@@ -52,6 +52,12 @@ dependencies {
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 }
 
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
 def robotManifest = {
     attributes "Main-Class": "edu.wpi.first.wpilibj.RobotBase"
     attributes "Robot-Class": frc.robotClass
