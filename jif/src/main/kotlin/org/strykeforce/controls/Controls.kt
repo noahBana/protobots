@@ -2,6 +2,8 @@ package org.strykeforce.controls
 
 import edu.wpi.first.wpilibj.Joystick
 import edu.wpi.first.wpilibj.buttons.JoystickButton
+import edu.wpi.first.wpilibj.command.PrintCommand
+import org.strykeforce.command.MotionCommand
 import org.strykeforce.command.ZeroGyroCommand
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,6 +16,11 @@ class Controls @Inject constructor() {
 
     init {
         JoystickButton(driverController, Switch.RESET.index).whenPressed(ZeroGyroCommand())
+        val distance = 250_000
+        JoystickButton(driverController, Switch.UP_ARROW.index).whenPressed(MotionCommand(0.0, distance))
+        JoystickButton(driverController, Switch.DOWN_ARROW.index).whenPressed(MotionCommand(180.0, distance))
+        JoystickButton(driverController, Switch.HAMBURGER.index).whenPressed(MotionCommand(90.0, distance))
+        JoystickButton(driverController, Switch.X.index).whenPressed(MotionCommand(-90.0, distance))
     }
 
     val forward: Double
@@ -34,7 +41,11 @@ enum class Shoulder constructor(val index: Int) {
 
 enum class Switch constructor(val index: Int) {
     LEFT(1),
-    RESET(3)
+    RESET(3),
+    HAMBURGER(14),
+    X(15),
+    UP_ARROW(16),
+    DOWN_ARROW(17)
 }
 
 enum class Trim constructor(val index: Int) {

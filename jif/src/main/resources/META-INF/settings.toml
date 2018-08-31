@@ -3,6 +3,9 @@
   width         = 26.625 # wheelbase width
   enableGyroLogging = true # turn this off if too noisy
 
+[THIRDCOAST.WHEEL]
+  driveSetpointMax = 40_000
+
 [THIRDCOAST.TALONS]
   summarizeErrors = true
 
@@ -40,3 +43,11 @@
  [TALON.velocityMeasurement]
    period = "Period_50Ms"
    window = 32
+ [[TALON.closedLoopProfile]] # slot 0 Velocity
+   pGain = 0.01
+   iGain = 0.0003
+   dGain = 0.6
+   fGain = 0.028
+   iZone = 3000
+   maxIntegralAccumulator = 200_000
+   allowableClosedLoopError = 0
