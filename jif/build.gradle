@@ -7,6 +7,7 @@ buildscript {
         kotlin_version = "1.2.61"
         dagger_version = "2.17"
         thirdcoast_version = "18.6.0"
+        moshi_version = "1.6.0"
     }
 
     repositories {
@@ -50,6 +51,12 @@ dependencies {
     compile "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
     compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+
+    compile "com.squareup.moshi:moshi:$moshi_version"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:$moshi_version"
+
+    compile "com.github.kittinunf.fuel:fuel:1.15.0"
+
 }
 
 compileKotlin {
@@ -83,9 +90,9 @@ deploy {
 
 idea {
     module {
-        sourceDirs += file("build/generated/source/kapt/main")
-        generatedSourceDirs += file("build/generated/source/kapt/main")
         downloadJavadoc = true
         downloadSources = true
+        sourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
     }
 }

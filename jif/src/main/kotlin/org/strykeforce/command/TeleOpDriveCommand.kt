@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.command.Command
 import org.strykeforce.robotComponents
 import org.strykeforce.thirdcoast.swerve.SwerveDrive.DriveMode.TELEOP
 
-const val DEADBAND = 0.05
+const val DEADBAND = 0.08
 
 class TeleOpDriveCommand : Command() {
 
