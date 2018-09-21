@@ -10,7 +10,7 @@ import java.io.File
 //   fl1  = filter 1 window length. fl1 = roundup(t1/dt)
 //   fl2  = filter 2 window length. fl2 = roundup(t2/dt)
 // vProg  = desired max speed, ticks/sec
-//  dist  = travel distance, ticks
+//  dist  = travel actualDistance, ticks
 //    t4  = time to get to destination, in ms, at vProg. t4 = dist/vProg
 //     n  = number of inputs to filter. n = roundup(t4/dt)
 

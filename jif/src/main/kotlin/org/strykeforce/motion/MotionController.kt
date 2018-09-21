@@ -1,15 +1,10 @@
 package org.strykeforce.motion
 
-import com.github.kittinunf.fuel.httpPost
-import com.github.kittinunf.result.failure
-import com.github.kittinunf.result.success
-import com.squareup.moshi.Moshi
 import edu.wpi.first.wpilibj.Notifier
 import mu.KotlinLogging
 import org.strykeforce.robotComponents
 import org.strykeforce.thirdcoast.swerve.SwerveDrive
 
-const val POST = "http://192.168.3.208:5000/load"
 const val K_P = -0.64
 const val GOOD_ENOUGH = 2500
 
@@ -31,7 +26,6 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
 
     private val start = IntArray(4)
 
-    private val jsonAdapter = ActivityJsonAdapter(Moshi.Builder().build())
     private var activity = Activity("Magic on Jif")
 
 
@@ -49,19 +43,23 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         activity.meta["vProg"] = V_PROG.toInt().toString()
         activity.meta["direction"] = direction.toString()
         activity.meta["azimuth"] = azimuth.toString()
-        activity.profileTicks = distance
         activity.meta["tags"] = listOf("jif", "magic")
+
+        activity.activityData.add(distance.toDouble())
     }
 
     val isFinished
         get() = motionProfile.isFinished && Math.abs(positionError()) < GOOD_ENOUGH
 
-    val distance: Double
+    val actualDistance: Double
         get() {
             var distance = 0.0
             for (i in 0..3) distance += Math.abs(drive.wheels[i].driveTalon.getSelectedSensorPosition(0) - start[i])
             return distance / 4.0
         }
+
+    val actualVelocity: Int
+        get() = drive.wheels[0].driveTalon.getSelectedSensorVelocity(0)
 
     fun start() {
         notifier.startPeriodic(DT_MS / 1000.0)
@@ -76,17 +74,10 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         drive.drive(0.0, 0.0, 0.0)
         logger.info("FINISH motion position = {}", motionProfile.currPos)
         activity.meta["gyroEnd"] = drive.gyro.angle.toString()
-        activity.actualTicks = distance.toInt()
+        activity.activityData.add(actualDistance)
+        activity.activityData.add(0.0) // actual_distance measured physically
 
-        val (_, _, result) = POST.httpPost()
-            .header("content-type" to "application/json")
-            .body(jsonAdapter.toJson(activity))
-            .responseString()
-
-        result.success { logger.info(result.get()) }
-
-        result.failure { logger.error("error sending data to database", result.component2()) }
-
+        activity.upload()
     }
 
     fun updateDrive() {
@@ -96,21 +87,21 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         val strafe = strafeComponent * velocity
         val azimuth = 0.0
         drive.drive(forward, strafe, azimuth)
-        // milliseconds, profile_acceleration, profile_velocity, profile_ticks, actual_ticks, forward, strafe, azimuth
-        activity.data.add(
+        activity.traceData.add(
             listOf(
-                motionProfile.iteration * DT_MS.toDouble(),
-                motionProfile.currAcc,
-                motionProfile.currVel,
-                motionProfile.currPos,
-                velocity,
-                distance,
-                forward,
-                strafe,
-                azimuth
+                motionProfile.iteration * DT_MS.toDouble(), // millis
+                motionProfile.currAcc,     // profile_acc
+                motionProfile.currVel,     // profile_vel
+                velocity,                  // setpoint_vel
+                actualVelocity.toDouble(), // actual_vel
+                motionProfile.currPos,     // profile_ticks
+                actualDistance,            // actual_ticks
+                forward,  // forward
+                strafe,   // strafe
+                azimuth   // azimuth
             )
         )
     }
 
-    fun positionError() = distance - motionProfile.currPos
+    fun positionError() = actualDistance - motionProfile.currPos
 }
