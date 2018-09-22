@@ -26,7 +26,23 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
 
     private val start = IntArray(4)
 
-    private var activity = Activity("Magic on Jif")
+    private var activity =
+        Activity(
+            name = "Magic on Jif",
+            activityMeasures = listOf("profile_ticks", "actual_ticks", "actual_distance"),
+            traceMeasures = listOf(
+                "millis",
+                "profile_acc",
+                "profile_vel",
+                "setpoint_vel",
+                "actual_vel",
+                "profile_ticks",
+                "actual_ticks",
+                "foward",
+                "strafe",
+                "azimuth"
+            )
+        )
 
 
     init {
@@ -45,20 +61,20 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         activity.meta["azimuth"] = azimuth.toString()
         activity.meta["tags"] = listOf("jif", "magic")
 
-        activity.activityData.add(distance.toDouble())
+        activity.activityData.add(distance.toDouble()) // profile_ticks
     }
 
     val isFinished
         get() = motionProfile.isFinished && Math.abs(positionError()) < GOOD_ENOUGH
 
-    val actualDistance: Double
+    private val actualDistance: Double
         get() {
             var distance = 0.0
             for (i in 0..3) distance += Math.abs(drive.wheels[i].driveTalon.getSelectedSensorPosition(0) - start[i])
             return distance / 4.0
         }
 
-    val actualVelocity: Int
+    private val actualVelocity: Int
         get() = drive.wheels[0].driveTalon.getSelectedSensorVelocity(0)
 
     fun start() {
@@ -74,13 +90,13 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         drive.drive(0.0, 0.0, 0.0)
         logger.info("FINISH motion position = {}", motionProfile.currPos)
         activity.meta["gyroEnd"] = drive.gyro.angle.toString()
-        activity.activityData.add(actualDistance)
-        activity.activityData.add(0.0) // actual_distance measured physically
+        activity.activityData.add(actualDistance) // actual_ticks
+        activity.activityData.add(0.0) // actual_distance, measured physically
 
         activity.upload()
     }
 
-    fun updateDrive() {
+    private fun updateDrive() {
         motionProfile.calculate()
         val velocity = motionProfile.currVel + K_P * positionError()
         val forward = forwardComponent * velocity
@@ -89,7 +105,7 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         drive.drive(forward, strafe, azimuth)
         activity.traceData.add(
             listOf(
-                motionProfile.iteration * DT_MS.toDouble(), // millis
+                (motionProfile.iteration * DT_MS).toDouble(), // millis
                 motionProfile.currAcc,     // profile_acc
                 motionProfile.currVel,     // profile_vel
                 velocity,                  // setpoint_vel
@@ -103,5 +119,5 @@ class MotionController(direction: Double, distance: Int, azimuth: Double = 0.0) 
         )
     }
 
-    fun positionError() = actualDistance - motionProfile.currPos
+    private fun positionError() = actualDistance - motionProfile.currPos
 }

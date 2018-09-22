@@ -12,20 +12,9 @@ const val POST = "http://192.168.3.208:5000/load"
 @JsonClass(generateAdapter = true)
 data class Activity(
     val name: String,
-    val activityMeasures: List<String> = listOf("profile_ticks", "actual_ticks", "actual_distance"),
+    val activityMeasures: List<String>,
     val activityData: MutableList<Double> = mutableListOf(),
-    val traceMeasures: List<String> = listOf(
-        // millis stripped out by loader
-        "profile_acc",
-        "profile_vel",
-        "setpoint_vel",
-        "actual_vel",
-        "profile_ticks",
-        "actual_ticks",
-        "foward",
-        "strafe",
-        "azimuth"
-    ),
+    val traceMeasures: List<String>,
     val traceData: MutableList<List<Double>> = mutableListOf(),
     val meta: MutableMap<String, Any> = mutableMapOf()
 )
