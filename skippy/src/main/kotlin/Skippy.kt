@@ -1,34 +1,43 @@
 package org.strykeforce
 
-import dagger.BindsInstance
-import dagger.Component
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import com.ctre.phoenix.motorcontrol.NeutralMode
+import com.ctre.phoenix.motorcontrol.can.TalonSRX
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration
+import com.kauailabs.navx.frc.AHRS
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.SPI
 import edu.wpi.first.wpilibj.TimedRobot
 import mu.KotlinLogging
 import org.strykeforce.controls.Controls
-import org.strykeforce.thirdcoast.swerve.GyroModule
 import org.strykeforce.thirdcoast.swerve.SwerveDrive
-import org.strykeforce.thirdcoast.swerve.WheelModule
+import org.strykeforce.thirdcoast.swerve.SwerveDriveConfig
+import org.strykeforce.thirdcoast.swerve.Wheel
 import java.io.File
-import java.net.URL
-import javax.inject.Singleton
 
-const val CONFIG = "/home/lvuser/skippy.toml"
-const val DEFAULT_CONFIG = "/META-INF/settings.toml"
 const val SAVE_AZIMUTHS = "/home/lvuser/zero.me"
 
 const val DEADBAND = 0.05
+private val logger = KotlinLogging.logger {}
 
 class Skippy : TimedRobot() {
 
-    private val logger = KotlinLogging.logger {}
-
-    private val components = robotComponents()
-    private val controls = components.controls()
-    private val swerveDrive = components.swerveDrive()
+    private val controls = Controls()
+    private val ahrs = AHRS(SPI.Port.kMXP)
+    private val swerveDrive = SwerveDrive(
+        SwerveDriveConfig().apply {
+            wheels = getSkippyWheels()
+            gyro = ahrs
+            length = 20.625
+            width = 26.125
+            gyroLoggingEnabled = true
+            summarizeTalonErrors = false
+        }
+    )
     private val gyroResetButton = controls.resetButton
 
     override fun robotInit() {
+
         // save azimuth zero positions by creating file named in SAVE_AZIMUTHS
         if (File(SAVE_AZIMUTHS).delete()) swerveDrive.saveAzimuthPositions()
         swerveDrive.zeroAzimuthEncoders()
@@ -36,6 +45,7 @@ class Skippy : TimedRobot() {
 
     override fun teleopInit() {
         swerveDrive.stop()
+        logger.debug { "gyro connected: ${ahrs.isConnected}" }
     }
 
     override fun teleopPeriodic() {
@@ -53,31 +63,48 @@ class Skippy : TimedRobot() {
             }
         }
     }
-
-    private fun robotComponents(): RobotComponents {
-        var config: URL = this.javaClass.getResource(DEFAULT_CONFIG)
-
-        val f = File(CONFIG)
-        if (f.exists() && !f.isDirectory) config = f.toURI().toURL()
-
-        logger.info("reading settings from '{}'", config)
-        return DaggerRobotComponents.builder().config(config).build()
-    }
 }
 
 private fun Double.applyDeadband(amount: Double) = if (Math.abs(this) < amount) 0.0 else this
 
-@Singleton
-@Component(modules = [GyroModule::class, WheelModule::class])
-interface RobotComponents {
-    fun controls(): Controls
-    fun swerveDrive(): SwerveDrive
+private fun getSkippyWheels(): Array<Wheel> {
+    val azimuthConfig = TalonSRXConfiguration().apply {
+        primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Relative
+        continuousCurrentLimit = 10
+        peakCurrentLimit = 0
+        peakCurrentDuration = 0
+        slot_0.apply {
+            kP = 10.0
+            kI = 0.0
+            kD = 100.0
+            kF = 1.0
+            integralZone = 0
+            allowableClosedloopError = 0
+        }
+        motionAcceleration = 10_000
+        motionCruiseVelocity = 800
+    }
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun config(config: URL): Builder
 
-        fun build(): RobotComponents
+    val driveConfig = TalonSRXConfiguration().apply {
+        primaryPID.selectedFeedbackSensor = FeedbackDevice.CTRE_MagEncoder_Relative
+        continuousCurrentLimit = 40
+        peakCurrentLimit = 0
+        peakCurrentDuration = 0
+    }
+
+    val timeout = 10
+
+    return Array(4) {
+        Wheel(
+            TalonSRX(it).apply { configAllSettings(azimuthConfig, timeout) },
+            TalonSRX(it + 10).apply {
+                configAllSettings(driveConfig, timeout)
+                setNeutralMode(NeutralMode.Brake)
+            }, 0.0
+        )
     }
 }
+
+
+

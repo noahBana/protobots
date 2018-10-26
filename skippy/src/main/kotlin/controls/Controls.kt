@@ -1,15 +1,9 @@
 package org.strykeforce.controls
 
 import edu.wpi.first.wpilibj.Joystick
-import org.strykeforce.controls.Trigger
-
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Accesses driver config input.  */
-@Singleton
-class Controls @Inject
-constructor() {
+class Controls {
 
     private val driverController = Joystick(1)
 
@@ -49,8 +43,8 @@ constructor() {
 const val DRIVER_RIGHT_X_AXIS = 0
 const val DRIVER_RIGHT_Y_AXIS = 1
 const val DRIVER_LEFT_Y_AXIS = 2
-const val DRIVER_TUNER_AXIS = 3
-const val DRIVER_LEFT_X_AXIS = 4
+const val DRIVER_TUNER_AXIS = 6
+const val DRIVER_LEFT_X_AXIS = 5
 
 const val DRIVER_LEFT_BUTTON = 1
 const val DRIVER_RIGHT_SHOULDER_BUTTON = 2
