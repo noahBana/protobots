@@ -1,0 +1,65 @@
+import edu.wpi.first.gradlerio.GradleRIOPlugin
+import edu.wpi.first.gradlerio.frc.FRCJavaArtifact
+import edu.wpi.first.gradlerio.frc.RoboRIO
+
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "gradle.plugin.edu.wpi.first:GradleRIO:2019.0.0-alpha-3"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: "edu.wpi.first.GradleRIO"
+
+def TEAM = 2767
+def ROBOT_CLASS = "org.strykeforce.Robot"
+
+deploy {
+    targets {
+        target("roborio", RoboRIO) {
+            team = TEAM
+        }
+    }
+    artifacts {
+        artifact('frcJava', FRCJavaArtifact) {
+            targets << "roborio"
+        }
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+wpi {
+    ctreVersion = "5.7.1.0"
+}
+
+dependencies {
+
+    compile wpilib()
+    compile ctre()
+    compile navx()
+}
+
+def robotManifest = {
+    attributes 'Main-Class': 'edu.wpi.first.wpilibj.RobotBase'
+    attributes 'org.strykeforce.Robot-Class': frc.robotClass
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest GradleRIOPlugin.javaManifest(ROBOT_CLASS)
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
