@@ -7,7 +7,7 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import mu.KotlinLogging
 
-const val POST = "http://192.168.3.208:5000/load"
+const val POST = "http://192.168.3.207IN:5000/load"
 
 @JsonClass(generateAdapter = true)
 data class Activity(
