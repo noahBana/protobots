@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.drive.GimpDriveCommand;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import org.strykeforce.telemetry.TelemetryController;
@@ -36,6 +37,7 @@ public class RobotContainer {
     driveSubsystem.registerWith(telemetryService);
 
     driveSubsystem.setDefaultCommand(new TeleopDriveCommand(driveJoystick, driveSubsystem));
+    telemetryService.start();
   }
 
   /**
@@ -45,21 +47,24 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driveJoystick.setXChannel(0);
+    driveJoystick.setXChannel(1);
     driveJoystick.setYChannel(0);
-    driveJoystick.setTwistChannel(0);
+    driveJoystick.setTwistChannel(2);
 
     new JoystickButton(driveJoystick, Button.A.id)
         .whenPressed(new InstantCommand(driveSubsystem::resetGyro, driveSubsystem));
-    new JoystickButton(driveJoystick, Button.B.id)
+    new JoystickButton(driveJoystick, Button.X.id)
         .whenPressed(new InstantCommand(driveSubsystem::xLock, driveSubsystem));
+    new JoystickButton(driveJoystick, Button.START.id)
+        .whenPressed(new GimpDriveCommand(driveSubsystem));
   }
 
   public enum Button {
-    A(0),
-    B(0),
-    C(0),
-    D(0);
+    A(2),
+    B(3),
+    Y(4),
+    X(1),
+    START(10);
 
     public final int id;
 

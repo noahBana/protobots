@@ -23,6 +23,7 @@ import org.strykeforce.telemetry.measurable.Measure;
 public class DriveSubsystem extends MeasurableSubsystem {
   private final Logger logger = LoggerFactory.getLogger(DriveSubsystem.class);
   private final SwerveDrive swerveDrive;
+  public boolean isGimp = true;
 
   public DriveSubsystem() {
     var moduleBuilder =
@@ -137,6 +138,22 @@ public class DriveSubsystem extends MeasurableSubsystem {
 
   public Pose2d getPoseMeters() {
     return swerveDrive.getPoseMeters();
+  }
+
+  public double getMaxSpeed() {
+    if (isGimp) {
+      return Constants.DriveConstants.kMaxGimpSpeedMetersPerSecond;
+    } else {
+      return Constants.DriveConstants.kMaxSpeedMetersPerSecond;
+    }
+  }
+
+  public double getMaxOmega() {
+    if (isGimp) {
+      return Constants.DriveConstants.kMaxGimpOmega;
+    } else {
+      return Constants.DriveConstants.kMaxOmega;
+    }
   }
 
   @Override

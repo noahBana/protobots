@@ -33,10 +33,13 @@ public final class Constants {
 
     // From: https://github.com/strykeforce/axis-config/
     public static final double kMaxSpeedMetersPerSecond = 3.889;
+    public static final double kMaxGimpSpeedMetersPerSecond = 1;
 
     public static final double kMaxOmega =
         (kMaxSpeedMetersPerSecond / Math.hypot(kRobotLength / 2.0, kRobotWidth / 2.0))
             / 2.0; // wheel locations below
+    public static final double kMaxGimpOmega =
+        (kMaxGimpSpeedMetersPerSecond / Math.hypot(kRobotLength / 2.0, kRobotWidth / 2.0)) / 2.0;
 
     // From: https://github.com/strykeforce/axis-config/
     static final double kDriveMotorOutputGear = 21;

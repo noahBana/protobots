@@ -20,11 +20,11 @@ public class TeleopDriveCommand extends CommandBase {
   public void execute() {
     driveSubsystem.drive(
         MathUtil.applyDeadband(driveJoystick.getX(), DriveConstants.kDeadbandAllStick)
-            * DriveConstants.kMaxSpeedMetersPerSecond,
+            * driveSubsystem.getMaxSpeed(),
         MathUtil.applyDeadband(driveJoystick.getY(), DriveConstants.kDeadbandAllStick)
-            * DriveConstants.kMaxSpeedMetersPerSecond,
+            * driveSubsystem.getMaxSpeed(),
         MathUtil.applyDeadband(driveJoystick.getTwist(), DriveConstants.kDeadbandAllStick)
-            * DriveConstants.kMaxOmega);
+            * driveSubsystem.getMaxOmega());
   }
 
   @Override
