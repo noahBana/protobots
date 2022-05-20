@@ -61,7 +61,7 @@ public final class Constants {
     }
 
     public static SupplyCurrentLimitConfiguration getAzimuthCurrentLimit() {
-      return new SupplyCurrentLimitConfiguration(true, 10, 15, 0.04);
+      return new SupplyCurrentLimitConfiguration(true, 10, 15, 0.2);
     }
 
     public static TalonSRXConfiguration getAzimuthTalonConfig() {
@@ -74,10 +74,10 @@ public final class Constants {
       azimuthConfig.forwardLimitSwitchSource = LimitSwitchSource.Deactivated;
       azimuthConfig.reverseLimitSwitchSource = LimitSwitchSource.Deactivated;
 
-      azimuthConfig.slot0.kP = 10.0;
+      azimuthConfig.slot0.kP = 5.0;
       azimuthConfig.slot0.kI = 0.0;
       azimuthConfig.slot0.kD = 100.0;
-      azimuthConfig.slot0.kF = 0.0;
+      azimuthConfig.slot0.kF = 0.9;
       azimuthConfig.slot0.integralZone = 0;
       azimuthConfig.slot0.allowableClosedloopError = 0;
       azimuthConfig.slot0.maxIntegralAccumulator = 0;
@@ -85,6 +85,7 @@ public final class Constants {
       azimuthConfig.motionAcceleration = 10_000;
       azimuthConfig.velocityMeasurementWindow = 64;
       azimuthConfig.voltageCompSaturation = 12;
+      azimuthConfig.neutralDeadband = 0.01;
       return azimuthConfig;
     }
 
